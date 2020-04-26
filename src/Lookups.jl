@@ -53,7 +53,7 @@ function Base.iterate( lkl::LockandKeyLookup, state::T = ( iterate( lkl.key ), i
     ( key_value, key_state ), tumbler_values_and_states = state
     tumbler_values_and_states = collect( tumbler_values_and_states )
     tumbler_values_and_states = convert(Vector{ Union{ eltype(tumbler_values_and_states), Nothing } }, tumbler_values_and_states)
-    ( last( key_state ) > lkl.key_length ) && return nothing
+    #( last( key_state ) > lkl.key_length ) && return nothing
     tumbler_values, tumbler_states = unpack_2tuples( tumbler_values_and_states )
     tumbler_values = convert(Vector{ Union{ eltype(tumbler_values), Nothing } }, tumbler_values)
     tumbler_states = convert(Vector{ Union{ eltype(tumbler_states), Nothing } }, tumbler_states)
@@ -68,40 +68,35 @@ function Base.iterate( lkl::LockandKeyLookup, state::T = ( iterate( lkl.key ), i
     key_idx, tumbler_idx, pin_idx  = last(key_state), smallest_pin, last( tumbler_states[smallest_pin] )
     # If match( Key, Lowest Pin )
     if lkl.emission_fn( get_key, get_pins[ smallest_pin ] )
-        #tumbler_values_and_states[ smallest_pin ] = Base.iterate( lkl.tumbler[ smallest_pin ], tumbler_states[ smallest_pin ] )
-        #tumbler_values, tumbler_states = unpack_2tuples( tumbler_values_and_states )
         tumbler_idx = smallest_pin
         pin_idx     = last( tumbler_states[ smallest_pin ] )
         values_and_states = Base.iterate( lkl.tumbler[ smallest_pin ], tumbler_states[ smallest_pin ] )
         tumbler_values[ smallest_pin ], tumbler_states[ smallest_pin ] = isnothing( values_and_states ) ? [nothing,nothing] : values_and_states
-        println("111 Kick tumbler match")
+        #println("111 Kick tumbler match")
     else
         while ( !lkl.emission_fn( get_key, get_pins[ smallest_pin ] ) )
             if get_key < get_pins[ smallest_pin ]
-                println("222 Kick key")
+                #println("222 Kick key")
                 while ( get_key < get_pins[ smallest_pin ] )
-                    ( key_value, key_state ) = Base.iterate( lkl.key, key_state )
-                    ( last( key_state ) > lkl.key_length ) && return nothing
+                    key_value_and_state = Base.iterate( lkl.key, key_state )
+                    isnothing( key_value_and_state ) && return nothing
+                    ( key_value, key_state ) = key_value_and_state
                     get_key = lkl.key_lookup_fn( key_value )
                 end
                 key_idx = last( key_state )
-                #key_value, key_state = Base.iterate( lkl.key, key_state )
             elseif get_key > get_pins[smallest_pin]
-                println("333 Kick tumbler")
+                #println("333 Kick tumbler")
                 while ( get_key > get_pins[ smallest_pin ] )
                     values_and_states = Base.iterate( lkl.tumbler[ smallest_pin ], tumbler_states[ smallest_pin ] )
                     tumbler_values[ smallest_pin ], tumbler_states[ smallest_pin ] = isnothing( values_and_states ) ? [nothing,nothing] : values_and_states
                     notnothing            = .!isnothing.( tumbler_values )
                     get_pins              = map( x -> isnothing(x) ? x : lkl.pin_lookup_fn( x ), tumbler_values )
                     smallest_pin          = get_smallest_pin( get_pins, notnothing )
-                    #println( get_key, " && ", get_pins[ smallest_pin ] )
                     ( smallest_pin == 0 ) && return nothing
                 end
                 key_idx = last( key_state )
-                #key_value, key_state = Base.iterate( lkl.key, key_state )
-                tumbler_idx = smallest_pin
-                #pin_idx     = last( tumbler_states[ smallest_pin ] )
             end
+            #Update the tumbler if we have a match
             tumbler_idx = smallest_pin
             pin_idx     = last( tumbler_states[ smallest_pin ] )
             if lkl.emission_fn( get_key, get_pins[ smallest_pin ] )
