@@ -1,6 +1,12 @@
 using LockandKeyLookups
 using Test, DataFrames
 
+#DEVELOPERS: Useful snippit for debugging
+# for i in LockandKeyLookup( eachrow( a ), eachrow.( [ b ] ), X -> X.a, X -> X.b )
+#      println( i )
+#      println(b[i[2][2],:b])
+# end
+
 @testset "LockandKeyLookups - iterations" begin
     # examples...
     endrng = 3
@@ -68,8 +74,15 @@ end
     @test all( LKL_result .== [ 1 => ( 1, 14 ) , 2 => ( 1, 16 ), 3 => ( 1, 18 ), 4 => ( 1, 20 ), 5 => ( 1, 22 ) ] )
 
 end
-#DEVELOPERS: Useful snippit for debugging
-# for i in LockandKeyLookup( eachrow( a ), eachrow.( [ b ] ), X -> X.a, X -> X.b )
-#      println( i )
-#      println(b[i[2][2],:b])
-# end
+
+@testset "LockandKeyLookups - Internal code tests..." begin
+    a = DataFrame( Dict( :a => 1:1:11, :b => 1:1:11 ) )
+    b = DataFrame( Dict( :b => 1:1:11, :c => 1:1:11 ) )
+    #test changing a value
+    LKL_iterator = LockandKeyLookup( eachrow( a ), eachrow.( [ b ] ), X -> X.a, X -> X.b )
+    @test length( LKL_iterator ) == Base.SizeUnknown()
+    @test Base.IteratorSize( LKL_iterator ) == Base.SizeUnknown()
+    #
+    @test all( LockandKeyLookups.unpack_2tuples( [(1,2), (3,4)] ) .== [[1,3], [2,4] ])
+    @test all( LockandKeyLookups.unpack_2tuples( [(1,2), nothing, (3,4)] ) .== [[1,nothing,3], [2,nothing,4] ])
+end
