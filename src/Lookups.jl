@@ -8,6 +8,7 @@ struct LockandKeyLookup{ A <: Function, B <: Function, C <: Function, K, T }
     tumblers::Vector{ Int }
 end
 
+#Sizes of the return collection cannot be known at run time! Base.SizeUnknown() is the secret sauce to make true Julia Generators!
 Base.length(::LockandKeyLookup) = Base.SizeUnknown()
 Base.IteratorSize(::LockandKeyLookup) = Base.SizeUnknown()
 
@@ -35,6 +36,15 @@ function LockandKeyLookup(  key, tumbler,
                                 first( size( key ) ), length.(tumbler) )
 end
 
+"""
+    get_smallest_pin( pin_values, not_nothing )::Int
+
+An internal function for the tumbler portion of the iterator. It scans an array of available tumbler iterators - aka Pins - and finds the smallest index.
+
+Note: In cases where there is a tie, the leftmost tied pin will be selected.
+In cases where all pins are of type `Nothing` this function returns an integer value of 0.
+
+"""
 function get_smallest_pin( pin_values, not_nothing )::Int
     is_something    = sum( not_nothing )
     if is_something == 0
@@ -46,8 +56,22 @@ function get_smallest_pin( pin_values, not_nothing )::Int
     end
 end
 
+"""
+    unpack_2tuples( x )
+
+This function unpacks collections of 2-tuples into 2 arrays in one pass.
+Note: Nothings are handled by expanding into `(nothing, nothing)`
+
+"""
 unpack_2tuples( x ) = collect.(zip( [ isnothing( i ) ? [ i, i ] : i  for i in x ]... ) )
 
+
+"""
+    Base.iterate( lkl::LockandKeyLookup, state::T = ( iterate( lkl.key ), iterate.(lkl.tumbler) ) ) where T <: Any
+
+This would be the main iterator for a given `LockandKeyLookup` instance.
+
+"""
 function Base.iterate( lkl::LockandKeyLookup, state::T = ( iterate( lkl.key ), iterate.(lkl.tumbler) ) ) where T <: Any
     # Get Latest Key:Tumbler State
     ( key_value, key_state ), tumbler_values_and_states = state
