@@ -1,5 +1,6 @@
 module LockandKeyLookups
 
-greet() = print("Hello World!")
+    include("Lookups.jl")
+    export LockandKeyLookup
 
 end # module

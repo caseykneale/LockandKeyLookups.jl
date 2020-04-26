@@ -3,6 +3,10 @@ uuid = "2e05b275-071e-4a72-a6f9-4f599bc7944c"
 authors = ["Casey Kneale"]
 version = "0.1.0"
 
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
 [compat]
 julia = "1.4"
 
