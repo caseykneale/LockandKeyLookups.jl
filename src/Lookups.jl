@@ -68,8 +68,12 @@ function Base.iterate( lkl::LockandKeyLookup, state::T = ( iterate( lkl.key ), i
     key_idx, tumbler_idx, pin_idx  = last(key_state), smallest_pin, last( tumbler_states[smallest_pin] )
     # If match( Key, Lowest Pin )
     if lkl.emission_fn( get_key, get_pins[ smallest_pin ] )
-        tumbler_values_and_states[ smallest_pin ] = Base.iterate( lkl.tumbler[ smallest_pin ], tumbler_states[ smallest_pin ] )
-        tumbler_values, tumbler_states = unpack_2tuples( tumbler_values_and_states )
+        #tumbler_values_and_states[ smallest_pin ] = Base.iterate( lkl.tumbler[ smallest_pin ], tumbler_states[ smallest_pin ] )
+        #tumbler_values, tumbler_states = unpack_2tuples( tumbler_values_and_states )
+        tumbler_idx = smallest_pin
+        pin_idx     = last( tumbler_states[ smallest_pin ] )
+        values_and_states = Base.iterate( lkl.tumbler[ smallest_pin ], tumbler_states[ smallest_pin ] )
+        tumbler_values[ smallest_pin ], tumbler_states[ smallest_pin ] = isnothing( values_and_states ) ? [nothing,nothing] : values_and_states
         println("111 Kick tumbler match")
     else
         while ( !lkl.emission_fn( get_key, get_pins[ smallest_pin ] ) )
@@ -93,8 +97,14 @@ function Base.iterate( lkl::LockandKeyLookup, state::T = ( iterate( lkl.key ), i
                     #println( get_key, " && ", get_pins[ smallest_pin ] )
                     ( smallest_pin == 0 ) && return nothing
                 end
+                key_idx = last( key_state )
+                #key_value, key_state = Base.iterate( lkl.key, key_state )
                 tumbler_idx = smallest_pin
-                pin_idx     = last( tumbler_states[ smallest_pin ] )
+                #pin_idx     = last( tumbler_states[ smallest_pin ] )
+            end
+            tumbler_idx = smallest_pin
+            pin_idx     = last( tumbler_states[ smallest_pin ] )
+            if lkl.emission_fn( get_key, get_pins[ smallest_pin ] )
                 values_and_states = Base.iterate( lkl.tumbler[ smallest_pin ], tumbler_states[ smallest_pin ] )
                 tumbler_values[ smallest_pin ], tumbler_states[ smallest_pin ] = isnothing( values_and_states ) ? [nothing,nothing] : values_and_states
             end
