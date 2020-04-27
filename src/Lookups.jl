@@ -29,7 +29,7 @@ The `emitter_fn` is the function used to determine if there is infact a match, b
 """
 function LockandKeyLookup(  key, tumbler,
                             key_lookup_fn, pin_lookup_fn,
-                            emitter_fn = ( k, t ) -> k == t)#key_lookup_fn( k ) == pin_lookup_fn( t ) )
+                            emitter_fn = ( k, t ) -> k == t)
     return LockandKeyLookup(    key, tumbler,
                                 key_lookup_fn, pin_lookup_fn,
                                 emitter_fn,
