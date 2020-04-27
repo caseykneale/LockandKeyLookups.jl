@@ -26,7 +26,7 @@ so we can iterate these instances in for loops, or collections as usual.
 where the structure of the `iter` item is the following `( Key_Index[i] => (  Tumbler_Index[J], Pin_Index[Q] ) ) = iter `
 So this gives us a mapping between a single key, and a single pin at a time.
 
-![LockAndKeyLooupDiagram](https://github.com/caseykneale/LockandKeyLookups.jl/tree/master/Images/locknkey.png)
+![LockAndKeyLookupDiagram](https://raw.githubusercontent.com/caseykneale/LockandKeyLookups.jl/master/Images/locknkey.png)
 
 ## Caveats
  - The items must be sorted by the associated key for this to work!
