@@ -86,3 +86,16 @@ end
     @test all( LockandKeyLookups.unpack_2tuples( [(1,2), (3,4)] ) .== [[1,3], [2,4] ])
     @test all( LockandKeyLookups.unpack_2tuples( [(1,2), nothing, (3,4)] ) .== [[1,nothing,3], [2,nothing,4] ])
 end
+
+@testset "LockandKeyLookups - run simple test with arrays" begin
+    # examples...
+    a = [ [ 1 2 ];
+            [ 3 4 ];
+            [ 5 6] ]
+    b = [ [ 1 2 ];
+            [ 3 4 ];
+            [ 5 6] ]
+    #Test single stream complete match
+    LKL_result = [ i for i in LockandKeyLookup( eachrow( a ), eachrow.( [ b ] ), X -> X[:,1], X -> X[:,1] ) ]
+    @test all( LKL_result .== [ 1 => ( 1, 1 ) , 2 => ( 1, 2 ), 3 => ( 1, 3 ) ] )
+end
